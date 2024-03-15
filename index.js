@@ -16,6 +16,22 @@ const corsOption ={
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
+// verify token
+const verifyToken= async(req,res,next) =>{
+    const token= req.cookies?.token;
+    console.log(token);
+    if(!token){
+    return res.status(401).send({message : 'unauthorized access'})
+    }
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded) =>{
+        if(err){
+            console.log(err);
+            return res.status(401).send({message : 'unauthorized access'})
+        }
+        req.user = decoded;
+        next();
+    })
+}
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DB_URL, {
     serverApi: {
