@@ -1,15 +1,15 @@
-const express=require('express');
-const app= express();
+const express = require('express');
+const app = express();
 require('dotenv').config();
-const cors=require('cors');
+const cors = require('cors');
 const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 // middleWare
-const corsOption ={
-    origin:['http://localhost:5173','http://localhost:5174'],
-    credentials:true,
+const corsOption = {
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    credentials: true,
     optionSuccessStatus: 200,
 }
 
@@ -17,16 +17,16 @@ app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
 // verify token
-const verifyToken= async(req,res,next) =>{
-    const token= req.cookies?.token;
+const verifyToken = async (req, res, next) => {
+    const token = req.cookies?.token;
     console.log(token);
-    if(!token){
-    return res.status(401).send({message : 'unauthorized access'})
+    if (!token) {
+        return res.status(401).send({ message: 'unauthorized access' })
     }
-    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded) =>{
-        if(err){
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
             console.log(err);
-            return res.status(401).send({message : 'unauthorized access'})
+            return res.status(401).send({ message: 'unauthorized access' })
         }
         req.user = decoded;
         next();
@@ -35,43 +35,57 @@ const verifyToken= async(req,res,next) =>{
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(process.env.DB_URL, {
     serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true,
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
     }
-  });
-  async function run() {
+});
+async function run() {
     try {
         // auth related api
-        app.post('/jwt',async(req,res) =>{
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
-            console.log('I need a new jwt',user);
-            const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+            console.log('I need a new jwt', user);
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
                 expiresIn: '365d',
             })
             res
-            .cookie("token",token,{
-                httpOnly:true,
-                secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-            })
-            .send({ success: true })
+                .cookie("token", token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                })
+                .send({ success: true })
         })
-     
-      // Send a ping to confirm a successful connection
-      await client.db("admin").command({ ping: 1 });
-      console.log("Pinged your deployment. You successfully connected to MongoDB!");
+        //  logout
+        app.get('/logout', async (req, res) => {
+            try {
+                res
+                    .clearCookie('token', {
+                        maxAge: 0,
+                        secure: process.env.NODE_ENV === 'production',
+                        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+                    })
+                    .send({ success: true })
+                console.log('Logout successful')
+            } catch (err) {
+                res.status(500).send(err)
+            }
+        })
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
-      // Ensures that the client will close when you finish/error
-    //   await client.close();
+        // Ensures that the client will close when you finish/error
+        //   await client.close();
     }
-  }
-  run().catch(console.dir);
+}
+run().catch(console.dir);
 
-app.get('/',(req,res) =>{
+app.get('/', (req, res) => {
     res.send('Hello from Blood_Donation Server..')
 })
 
 app.listen(port, () => {
     console.log(`Blood_Donation is running on port ${port}`)
-  })
+})
