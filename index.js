@@ -96,6 +96,12 @@ async function run() {
             res.send(result)
 
         })
+        // get all users 
+        app.get('/users',async(req,res) =>{
+            const result = await usersCollection.find().toArray();
+            res.send(result)
+        })
+        
         // post a donation
         app.post('/donations', async (req, res) => {
             const donation = req.body;
@@ -139,19 +145,25 @@ async function run() {
             res.send(result)
         })
         // pending donation status change--->
-        app.patch('/update-donation-status/:id',async(req,res) =>{
+        app.patch('/update-donation-status/:id', async (req, res) => {
             const id = req.params.id;
             const { donation_status } = req.body;
-            const query = {_id : new ObjectId(id)}
-            const updateDoc={
-                $set:{
-                    donation_status:donation_status
+            const query = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    donation_status: donation_status
                 }
-              }
-              const result = await donationsCollection.updateOne(query,updateDoc);
-              res.send(result)
+            }
+            const result = await donationsCollection.updateOne(query, updateDoc);
+            res.send(result)
         })
-       
+        //    delete donation
+        app.delete('/delete/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await donationsCollection.deleteOne(query);
+            res.send(result)
+        })
 
         // payment intent-->
         app.post('/create-payment-intent', verifyToken, async (req, res) => {
