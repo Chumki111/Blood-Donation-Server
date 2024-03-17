@@ -114,6 +114,23 @@ async function run() {
             const result = await donationsCollection.findOne({ _id: new ObjectId(id) });
             res.send(result);
         })
+        // donar pending donation-->
+        app.get('/pending-donations/pending/:email', async (req, res) => {
+            const email = req.params.email;
+            // Filter donations with pending status
+            const query = { requester_email: email, donation_status: 'pending' };
+            const result = await donationsCollection.find(query).toArray();
+            res.send(result)
+        })
+        // Endpoint to get a single pending donation by ID
+        app.get('/pending-donations/:id', async (req, res) => {
+            const id = req.params.id;
+            // Filter donation with pending status and the provided ID
+            const query = { _id: new ObjectId(id), donation_status: 'pending' };
+            const result = await donationsCollection.findOne(query);
+            res.send(result);
+        })
+
         // donar donations
         app.get('/donations/:email', async (req, res) => {
             const email = req.params.email;
@@ -133,7 +150,7 @@ async function run() {
             })
             res.send({ clientSecret: paymentIntent.client_secret })
         })
-        // save bookings info in bookings collection
+        // save payments information in collection
 
         app.post('/payments', verifyToken, async (req, res) => {
             const booking = req.body;
