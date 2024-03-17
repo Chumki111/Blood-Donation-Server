@@ -3,7 +3,7 @@ const app = express();
 require('dotenv').config();
 const cors = require('cors');
 const cookieParser = require('cookie-parser')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 // middleWare
@@ -43,6 +43,7 @@ const client = new MongoClient(process.env.DB_URL, {
 async function run() {
     try {
         const usersCollection = client.db('Blood_Donation').collection('users')
+        const donationsCollection = client.db('Blood_Donation').collection('donations')
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -93,6 +94,32 @@ async function run() {
             res.send(result)
 
         })
+        // post a donation
+        app.post('/donations', async (req, res) => {
+            const donation = req.body;
+            const result = await donationsCollection.insertOne(donation);
+            res.send(result);
+        })
+        // all donations
+        app.get('/donations', async (req, res) => {
+
+            const result = await donationsCollection.find().toArray()
+            res.send(result)
+        })
+        // get single room 
+        app.get('/donation/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await donationsCollection.findOne({ _id: new ObjectId(id) });
+            res.send(result);
+        })
+        // donar donations
+        app.get('/donations/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { requester_email: email }
+            const result = await donationsCollection.find(query).toArray();
+            res.send(result)
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
