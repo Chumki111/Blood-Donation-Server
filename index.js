@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.PAYMENT_SCERET_KEY)
 // middleWare
 const corsOption = {
     origin: ['http://localhost:5173', 'http://localhost:5174'],
@@ -44,6 +45,7 @@ async function run() {
     try {
         const usersCollection = client.db('Blood_Donation').collection('users')
         const donationsCollection = client.db('Blood_Donation').collection('donations')
+        const paymentsCollection = client.db('Blood_Donation').collection('payments')
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -119,6 +121,27 @@ async function run() {
             const result = await donationsCollection.find(query).toArray();
             res.send(result)
         })
+        // payment intent-->
+        app.post('/create-payment-intent', verifyToken, async (req, res) => {
+            const { price } = req.body;
+            const amount = parseInt(price * 100);
+            console.log('amount', amount);
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            })
+            res.send({ clientSecret: paymentIntent.client_secret })
+        })
+        // save bookings info in bookings collection
+
+        app.post('/payments', verifyToken, async (req, res) => {
+            const booking = req.body;
+            const result = await paymentsCollection.insertOne(booking);
+            // sent email----->
+            res.send(result);
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
