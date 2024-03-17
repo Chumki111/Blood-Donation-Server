@@ -122,6 +122,7 @@ async function run() {
             const result = await donationsCollection.find(query).toArray();
             res.send(result)
         })
+
         // Endpoint to get a single pending donation by ID
         app.get('/pending-donations/:id', async (req, res) => {
             const id = req.params.id;
@@ -130,7 +131,6 @@ async function run() {
             const result = await donationsCollection.findOne(query);
             res.send(result);
         })
-
         // donar donations
         app.get('/donations/:email', async (req, res) => {
             const email = req.params.email;
