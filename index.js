@@ -138,6 +138,21 @@ async function run() {
             const result = await donationsCollection.find(query).toArray();
             res.send(result)
         })
+        // pending donation status change--->
+        app.patch('/update-donation-status/:id',async(req,res) =>{
+            const id = req.params.id;
+            const { donation_status } = req.body;
+            const query = {_id : new ObjectId(id)}
+            const updateDoc={
+                $set:{
+                    donation_status:donation_status
+                }
+              }
+              const result = await donationsCollection.updateOne(query,updateDoc);
+              res.send(result)
+        })
+       
+
         // payment intent-->
         app.post('/create-payment-intent', verifyToken, async (req, res) => {
             const { price } = req.body;
