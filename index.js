@@ -125,6 +125,16 @@ async function run() {
             const result = await donationsCollection.findOne({ _id: new ObjectId(id) });
             res.send(result);
         })
+        // get single room 
+        app.patch('/donations/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedData = req.body;
+            
+            const query = {_id : new ObjectId(id)}
+            const updateDoc = { $set: updatedData };
+            const result = await donationsCollection.updateOne(query, updateDoc);
+            res.send(result);
+        })
         // donar pending donation-->
         app.get('/pending-donations/pending/:email', async (req, res) => {
             const email = req.params.email;
