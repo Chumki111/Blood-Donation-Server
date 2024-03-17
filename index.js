@@ -101,7 +101,12 @@ async function run() {
             const result = await usersCollection.find().toArray();
             res.send(result)
         })
-        
+        app.get('/user/:email',async(req,res) =>{
+            const email = req.params.email;
+            const query = { email : email};
+            const result= await usersCollection.findOne(query);
+            res.send(result)
+        })
         // post a donation
         app.post('/donations', async (req, res) => {
             const donation = req.body;
