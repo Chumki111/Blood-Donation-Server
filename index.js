@@ -96,6 +96,34 @@ async function run() {
             res.send(result)
 
         })
+        // update user
+        app.patch('/updateProfile/:email',async(req,res) =>{
+            try {
+                const email = req.params.email;
+                const updatedProfile = req.body; // Assuming the request body contains the updated profile data
+                    
+                // Find the user in the database based on the email
+                const query = { email: email };
+                const user = await usersCollection.findOne(query);
+        
+                if (!user) {
+                    return res.status(404).send({ message: 'User not found' });
+                }
+        
+                // Update the user's profile with the provided data
+                const result = await usersCollection.updateOne(query, { $set: updatedProfile });
+        
+                if (result.modifiedCount === 0) {
+                    return res.status(400).send({ message: 'Failed to update user profile' });
+                }
+        
+                // Send the updated user profile in the response
+                res.send({ message: 'User profile updated successfully', user: updatedProfile });
+            } catch (error) {
+                console.error('Error updating user profile:', error);
+                res.status(500).send({ message: 'Internal server error' });
+            }
+        })
         // get all users 
         app.get('/users',async(req,res) =>{
             const result = await usersCollection.find().toArray();
