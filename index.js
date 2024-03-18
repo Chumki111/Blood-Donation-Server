@@ -96,27 +96,27 @@ async function run() {
             res.send(result)
 
         })
-        // update user
-        app.patch('/updateProfile/:email',async(req,res) =>{
+        // update user from dashboard
+        app.patch('/updateProfile/:email', async (req, res) => {
             try {
                 const email = req.params.email;
                 const updatedProfile = req.body; // Assuming the request body contains the updated profile data
-                    
+
                 // Find the user in the database based on the email
                 const query = { email: email };
                 const user = await usersCollection.findOne(query);
-        
+
                 if (!user) {
                     return res.status(404).send({ message: 'User not found' });
                 }
-        
+
                 // Update the user's profile with the provided data
                 const result = await usersCollection.updateOne(query, { $set: updatedProfile });
-        
+
                 if (result.modifiedCount === 0) {
                     return res.status(400).send({ message: 'Failed to update user profile' });
                 }
-        
+
                 // Send the updated user profile in the response
                 res.send({ message: 'User profile updated successfully', user: updatedProfile });
             } catch (error) {
@@ -125,14 +125,14 @@ async function run() {
             }
         })
         // get all users 
-        app.get('/users',async(req,res) =>{
+        app.get('/users', async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result)
         })
-        app.get('/user/:email',async(req,res) =>{
+        app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
-            const query = { email : email};
-            const result= await usersCollection.findOne(query);
+            const query = { email: email };
+            const result = await usersCollection.findOne(query);
             res.send(result)
         })
         // post a donation
@@ -157,8 +157,8 @@ async function run() {
         app.patch('/donations/:id', async (req, res) => {
             const id = req.params.id;
             const updatedData = req.body;
-            
-            const query = {_id : new ObjectId(id)}
+
+            const query = { _id: new ObjectId(id) }
             const updateDoc = { $set: updatedData };
             const result = await donationsCollection.updateOne(query, updateDoc);
             res.send(result);
