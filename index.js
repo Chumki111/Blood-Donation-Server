@@ -9,7 +9,11 @@ const port = process.env.PORT || 5000;
 const stripe = require('stripe')(process.env.PAYMENT_SCERET_KEY)
 // middleWare
 const corsOption = {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: [
+        // 'https://blood-donation-cc6e2.web.app',
+        // 'https://blood-donation-cc6e2.firebaseapp.com'
+        'http://localhost:5173', 'http://localhost:5174'
+    ],
     credentials: true,
     optionSuccessStatus: 200,
 }
@@ -46,6 +50,8 @@ async function run() {
         const usersCollection = client.db('Blood_Donation').collection('users')
         const donationsCollection = client.db('Blood_Donation').collection('donations')
         const paymentsCollection = client.db('Blood_Donation').collection('payments')
+        const districtsCollection = client.db('Blood_Donation').collection('districts')
+        const upazilasCollection = client.db('Blood_Donation').collection('upazilas')
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -129,6 +135,17 @@ async function run() {
             const result = await usersCollection.find().toArray();
             res.send(result)
         })
+
+        // get all districts
+        app.get('/districts', async (req, res) => {
+            const result = await districtsCollection.find().toArray();
+            res.send(result)
+        })
+        // get all upazilas
+        app.get('/upazilas', async (req, res) => {
+            const result = await upazilasCollection.find().toArray();
+            res.send(result)
+        })
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -136,7 +153,7 @@ async function run() {
             res.send(result)
         })
         // post a donation
-        app.post('/donations', async (req, res) => {
+        app.post('/donations', verifyToken, async (req, res) => {
             const donation = req.body;
             const result = await donationsCollection.insertOne(donation);
             res.send(result);
@@ -228,6 +245,15 @@ async function run() {
             // sent email----->
             res.send(result);
         })
+
+        // Get total money received endpoint
+        app.get('/total-money-received', verifyToken, async (req, res) => {
+           
+                const payments = await paymentsCollection.find().toArray();
+                
+                res.send(payments);
+            
+        });
 
 
         // Send a ping to confirm a successful connection
