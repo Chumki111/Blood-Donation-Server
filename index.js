@@ -53,6 +53,7 @@ async function run() {
         const districtsCollection = client.db('Blood_Donation').collection('districts')
         const upazilasCollection = client.db('Blood_Donation').collection('upazilas')
         const testimonialCollection = client.db('Blood_Donation').collection('Testimonial')
+        const serviceSection = client.db('Blood_Donation').collection('services')
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -259,6 +260,11 @@ async function run() {
         // get all testimonial
         app.get('/Testimonial', async (req, res) => {
             const result = await testimonialCollection.find().toArray();
+            res.send(result)
+        })
+        // get all services
+        app.get('/services',async(req,res) =>{
+            const result = await serviceSection.find().toArray();
             res.send(result)
         })
 
