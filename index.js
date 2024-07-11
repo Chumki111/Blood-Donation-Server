@@ -54,6 +54,7 @@ async function run() {
         const upazilasCollection = client.db('Blood_Donation').collection('upazilas')
         const testimonialCollection = client.db('Blood_Donation').collection('Testimonial')
         const serviceSection = client.db('Blood_Donation').collection('services')
+        const blogCollection = client.db('Blood_Donation').collection('blogs')
         // auth related api
         app.post('/jwt', async (req, res) => {
             const user = req.body;
@@ -275,7 +276,13 @@ async function run() {
             const result = await serviceSection.findOne(query);
             res.send(result)
         })
+    //    get all blogs
+    app.get('/blogs',async(req,res) =>{
+        const  result = await blogCollection.find().toArray();
+        res.send(result)
+    })
 
+    
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
