@@ -289,6 +289,27 @@ async function run() {
         const result = await blogCollection.findOne(query);
         res.send(result)
     })
+    app.post('/blog/:id/comment', async (req, res) => {
+        const blogId = req.params.id;
+        const comment = req.body;
+        const query = { _id: new ObjectId(blogId) }
+    
+        try {
+            const result = await blogCollection.updateOne(
+                query,
+                { $push: { comments: comment } }
+            );
+    
+            if (result.modifiedCount === 0) {
+                return res.status(400).send({ message: 'Failed to add comment' });
+            }
+    
+            res.send({ message: 'Comment added successfully', comment });
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            res.status(500).send({ message: 'Internal server error' });
+        }
+    });
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
